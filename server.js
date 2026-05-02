@@ -93,7 +93,7 @@ app.post("/api/households", AuthMiddleware, async (req,res) => {
   let createHousehold = await HouseHoldModel.create({
     HouseHoldName,
     inviteCode: code,
-    member: [userId],
+    admin : userId,
     createdAt: new Date(),
   })
 
@@ -110,13 +110,100 @@ app.post("/api/households", AuthMiddleware, async (req,res) => {
   })
 });
 
-// app.post("/api/households/join", AuthMiddleware, async (req,res)=>{
-//     const userId = req.userid
-//     const Invitecode = req.body.InviteCode
+app.post("/api/households/join", AuthMiddleware, async (req,res)=>{
+    const userId = req.userId
+    const Invitecode = req.body.InviteCode
+    const householdId = req.body.householdId
 
-// })
+    const findHouse = await HouseHoldModel.findOne({
+      householdId : householdId
+    })
+
+    // let UserExist = await HouseHoldModel.findOne({
+    //   member : userId
+    // })
+    // if(!UserExist){
+    //   return res.status(404).json({
+    //     message:"user not found in household member list"
+    //   })
+    // }
+
+    let FindInviteCode = await HouseHoldModel.findOne({
+      inviteCode: Invitecode,
+    })
+    if(!FindInviteCode){
+      return res.status(404).json({
+        message:"Invitecode invalid"
+      })
+    }
+
+    const updateDb = await HouseHoldModel.findByIdAndUpdate(householdId, {
+      $push: { members: userId }
+    })
+
+    res.json({
+      message:"Welcome to Household",
+      members :{
+        updateDb
+      }
+    })
+})
 
 
+app.get('/api/households/me', AuthMiddleware, async (req, res)=>{
+  let userId = req.userId
+
+  let userExist = await UserModel.findOne({
+    _id : userId
+  })
+  if(!userExist){
+    return res.status(404).json({
+      message:"user not found in db"
+    })
+  }
+
+  let findUserhouse = await HouseHoldModel.findOne({
+    _id : userExist.HouseHoldId
+  })
+  if(!findUserhouse){
+    return res.status(404).json({
+      message:"userhouse not found"
+    })
+  }
+
+  res.json({
+    household : {
+      userId : userId,
+       findUserhouse
+    }
+  })
+})
+
+app.get("/api/households/allmembers", AuthMiddleware, async(req,res)=>{
+  let userId = req.userId
+  let userExist = await UserModel.findOne({
+    _id : userId
+  })
+  if(!userExist){
+    return res.status(404).json({
+      message:"user not found in db"
+    })
+  }
+
+  let findUserhouse = await HouseHoldModel.findOne({
+    _id : userExist.HouseHoldId
+  })
+  if(!findUserhouse){
+    return res.status(404).json({
+      message:"userhouse not found"
+    })
+  }
+  
+  res.json({
+    allmembers : findUserhouse.members
+  })
+
+})
 
 app.listen(3000, () => {
   console.log("server is running on port 3000");

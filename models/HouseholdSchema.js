@@ -7,12 +7,13 @@ const HouseholdSchema = new mongoose.Schema({
     type: String,
     unique: true,
   },
-  member: [
+  members: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
   ],
+  admin : String,
   wasteScore: {
     type: String,
     default: 0,
