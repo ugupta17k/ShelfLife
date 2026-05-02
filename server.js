@@ -7,6 +7,7 @@ const { AuthMiddleware } = require("./middlewares/authMiddleware");
 const { ConnectTODb } = require("./db/db");
 const referralCodes = require("referral-codes");
 const { HouseHoldModel } = require("./models/HouseholdSchema");
+const { itemsModel } = require("./models/itemsModel");
 
 const app = express();
 ConnectTODb();
@@ -204,6 +205,100 @@ app.get("/api/households/allmembers", AuthMiddleware, async(req,res)=>{
   })
 
 })
+
+// ------------------------- Items -----------------
+
+
+app.get("/api/items", AuthMiddleware, async (req,res)=>{
+  let userId = req.userId
+
+  let userExist = await UserModel.findOne({
+    _id : userId
+  })
+  if(!userExist){
+    return res.status(404).json({
+      message:"user not found in db"
+    })
+  }
+  
+  let findHouse = await HouseHoldModel.findOne({
+    members : userId
+  })
+
+  if(!findHouse){
+    return res.status(404).json({
+      message:"house not found"
+    })
+  }
+
+  let findItems = await itemsModel.find({
+    householdId : findHouse._id
+  })
+
+  res.json({
+    items : {
+      findItems
+    }
+  })
+})
+
+app.post("/api/items", AuthMiddleware, async (req, res)=>{
+  let userId = req.userId
+  let ItemsName = req.body.ItemsName
+  let category = req.body.category
+  let quantity = Number(req.body.quantity)
+  let status = req.body.status
+
+  let userExist = await UserModel.findOne({
+    _id : userId
+  })
+  if(!userExist){
+    return res.status(404).json({
+      message:"user not found in db"
+    })
+  }
+  
+  let findHouse = await HouseHoldModel.findOne({
+    members : userId
+  })
+
+  if(!findHouse){
+    return res.status(404).json({
+      message:"house not found"
+    })
+  }
+
+  let findCategory = await itemsModel.find({
+    category : category
+  })
+  if(!findCategory){
+    return res.status(404).json({
+      message:"category not found"
+    })
+  }
+  let findStatus = await itemsModel.find({
+    status : status
+  })
+  if(!findStatus){
+    return res.status(404).json({
+      message:"status not found"
+    })
+  }
+
+  let createItems = await itemsModel.create({
+    ItemsName : ItemsName,
+    HouseHoldId : findHouse._id ,
+    addedBy:userId,
+    category : category,
+    quantity : quantity,
+    status : status
+  })
+
+  res.json({
+    createItems
+  })
+})
+
 
 app.listen(3000, () => {
   console.log("server is running on port 3000");

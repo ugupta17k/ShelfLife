@@ -7,7 +7,7 @@ const UserSchema = new mongoose.Schema({
     email : String,
     password : String,
     HouseHoldId : {
-        type: mongoose.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref:'HouseHold'
     },
     createdAt : Date   
