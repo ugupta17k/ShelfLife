@@ -123,6 +123,7 @@ app.post("/api/households/join", AuthMiddleware, async (req,res)=>{
     // let UserExist = await HouseHoldModel.findOne({
     //   member : userId
     // })
+    
     // if(!UserExist){
     //   return res.status(404).json({
     //     message:"user not found in household member list"
@@ -212,14 +213,14 @@ app.get("/api/households/allmembers", AuthMiddleware, async(req,res)=>{
 app.get("/api/items", AuthMiddleware, async (req,res)=>{
   let userId = req.userId
 
-  let userExist = await UserModel.findOne({
-    _id : userId
-  })
-  if(!userExist){
-    return res.status(404).json({
-      message:"user not found in db"
-    })
-  }
+  // let userExist = await UserModel.findOne({
+  //   _id : userId
+  // })
+  // if(!userExist){
+  //   return res.status(404).json({
+  //     message:"user not found in db"
+  //   })
+  // }
   
   let findHouse = await HouseHoldModel.findOne({
     members : userId
@@ -232,8 +233,13 @@ app.get("/api/items", AuthMiddleware, async (req,res)=>{
   }
 
   let findItems = await itemsModel.find({
-    householdId : findHouse._id
+    HouseHoldId : findHouse._id
   })
+  if(findItems.length === 0){
+    return res.status(404).json({
+      message:"item not found"
+    })
+  }
 
   res.json({
     items : {
@@ -297,6 +303,63 @@ app.post("/api/items", AuthMiddleware, async (req, res)=>{
   res.json({
     createItems
   })
+})
+
+app.put("/api/items/:id", AuthMiddleware, async (req,res)=>{
+  let userId = req.userId 
+  let itemId = req.params.itemId
+  let NewTitle = req.body.NewTitle
+  let NewCategory = req.body.NewCategory
+  let NewStatus = req.body.NewStatus
+
+  let userExist = await UserModel.findOne({
+    _id : userId
+  })
+  if(!userExist){
+    return res.status(404).json({
+      message:"user not found in db"
+    })
+  }
+  
+  let findHouse = await HouseHoldModel.findOne({
+    members : userId
+  })
+
+  if(!findHouse){
+    return res.status(404).json({
+      message:"house not found"
+    })
+  }
+
+  let findItem = await itemsModel.find({
+    householdId : findHouse._id
+  })
+
+  if(!findItem){
+    return res.status(404).json({
+      message:"item not found"
+    })
+  }
+
+  let isUserAdded = await itemsModel.find({
+    addedBy : userId
+  })
+
+  if(!isUserAdded){
+    return res.status(404).json({
+      message : " user didn't create this item"
+    })
+  }
+
+  let updateItem = await itemsModel.findByIdAndUpdate(isUserAdded._id , {
+    ItemsName : NewTitle,
+    category : NewCategory,
+    status : NewStatus
+  })
+
+  res.json({
+    updateItem
+  })   
 })
 
 
