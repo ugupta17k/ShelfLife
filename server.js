@@ -305,63 +305,181 @@ app.post("/api/items", AuthMiddleware, async (req, res)=>{
   })
 })
 
-app.put("/api/items/:id", AuthMiddleware, async (req,res)=>{
-  let userId = req.userId 
-  let itemId = req.params.itemId
-  let NewTitle = req.body.NewTitle
-  let NewCategory = req.body.NewCategory
-  let NewStatus = req.body.NewStatus
 
-  let userExist = await UserModel.findOne({
-    _id : userId
-  })
-  if(!userExist){
-    return res.status(404).json({
-      message:"user not found in db"
-    })
-  }
-  
-  let findHouse = await HouseHoldModel.findOne({
-    members : userId
-  })
-
-  if(!findHouse){
-    return res.status(404).json({
-      message:"house not found"
-    })
-  }
-
-  let findItem = await itemsModel.find({
-    householdId : findHouse._id
-  })
-
-  if(!findItem){
-    return res.status(404).json({
-      message:"item not found"
-    })
-  }
-
-  let isUserAdded = await itemsModel.find({
-    addedBy : userId
-  })
-
-  if(!isUserAdded){
-    return res.status(404).json({
-      message : " user didn't create this item"
-    })
-  }
-
-  let updateItem = await itemsModel.findByIdAndUpdate(isUserAdded._id , {
-    ItemsName : NewTitle,
-    category : NewCategory,
-    status : NewStatus
-  })
-
+app.put("/api/items/updatee", AuthMiddleware, async (req,res)=>{
   res.json({
-    updateItem
-  })   
+    message :" workinggg dudeeeee"
+  })
 })
 
+app.put("/api/items/update", AuthMiddleware, async (req, res) => {
+  let userId = req.userId;
+  let itemId = req.body.itemId;
+  let NewTitle = req.body.NewTitle;
+  let NewCategory = req.body.NewCategory;
+
+  if (!itemId) {
+    return res.status(400).json({
+      message: "itemId is required in body",
+    });
+  }
+
+  let userExist = await UserModel.findOne({
+    _id: userId,
+  });
+  if (!userExist) {
+    return res.status(404).json({
+      message: "user not found in db",
+    });
+  }
+
+  let findHouse = await HouseHoldModel.findOne({
+    members: userId,
+  });
+
+  if (!findHouse) {
+    return res.status(404).json({
+      message: "house not found",
+    });
+  }
+
+  let findItem = await itemsModel.findOne({
+    _id: itemId,
+    HouseHoldId: findHouse._id,
+    addedBy: userId,
+  });
+
+  if (!findItem) {
+    return res.status(404).json({
+      message: "item not found or you are not allowed to update this item",
+    });
+  }
+
+  let updateItem = await itemsModel.findByIdAndUpdate(
+    itemId,
+    {
+      ItemsName: NewTitle,
+      category: NewCategory,
+    },
+    { new: true },
+  );
+
+  res.json({
+    message: "item updated successfully",
+    updateItem,
+  });
+});
+app.patch("/api/items/update/status", AuthMiddleware, async (req, res) => {
+  let userId = req.userId;
+  let itemId = req.body.itemId;
+  let status = req.body.status
+
+  if (!itemId) {
+    return res.status(400).json({
+      message: "itemId is required in body",
+    });
+  }
+
+  let userExist = await UserModel.findOne({
+    _id: userId,
+  });
+  if (!userExist) {
+    return res.status(404).json({
+      message: "user not found in db",
+    });
+  }
+
+  let findHouse = await HouseHoldModel.findOne({
+    members: userId,
+  });
+
+  if (!findHouse) {
+    return res.status(404).json({
+      message: "house not found",
+    });
+  }
+
+  let findItem = await itemsModel.findOne({
+    _id: itemId,
+    HouseHoldId: findHouse._id,
+    addedBy: userId,
+  });
+
+  if (!findItem) {
+    return res.status(404).json({
+      message: "item not found or you are not allowed to update this item",
+    });
+  }
+
+  let updateItem = await itemsModel.findByIdAndUpdate(
+    itemId,
+    {
+      status: status,
+    },
+    { new: true },
+  );
+
+  res.json({
+    message: "item updated successfully",
+    updateItem,
+  });
+});
+
+app.delete("/api/items/Delete", AuthMiddleware, async (req,res)=>{
+  let userId = req.userId
+  let itemId = req.body.itemId
+
+  if (!itemId) {
+    return res.status(400).json({
+      message: "itemId is required in body",
+    });
+  }
+
+  let userExist = await UserModel.findOne({
+    _id: userId,
+  });
+  if (!userExist) {
+    return res.status(404).json({
+      message: "user not found in db",
+    });
+  }
+
+  let findHouse = await HouseHoldModel.findOne({
+    members: userId,
+  });
+
+  if (!findHouse) {
+    return res.status(404).json({
+      message: "house not found",
+    });
+  }
+
+  let findItem = await itemsModel.findOne({
+    _id: itemId,
+    HouseHoldId: findHouse._id,
+    addedBy: userId,
+  });
+
+  if (!findItem) {
+    return res.status(404).json({
+      message: "item not found or you are not allowed to update this item",
+    });
+  }
+
+  let DeleteItem = await itemsModel.findByIdAndDelete(
+    itemId
+  )
+  if(!DeleteItem){
+    return res.status(404).json({
+      message:"item didnot get tabhi delete ni hua"
+    })
+  }
+
+  res.json({
+    message : " item deleted successfully",
+    DeleteItem
+  })
+})
 
 app.listen(3000, () => {
   console.log("server is running on port 3000");

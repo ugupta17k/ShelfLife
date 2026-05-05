@@ -2,7 +2,10 @@ const jwt = require("jsonwebtoken")
 
 
 async function AuthMiddleware(req, res, next){
-    const token = req.headers.token
+    const rawToken = req.headers.token || req.headers.authorization
+    const token = rawToken && rawToken.startsWith("Bearer ")
+        ? rawToken.split(" ")[1]
+        : rawToken
     if(!token){
         res.status(404).json({
             message:"token not found"
