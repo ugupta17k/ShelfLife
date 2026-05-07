@@ -8,11 +8,13 @@ const { ConnectTODb } = require("./db/db");
 const referralCodes = require("referral-codes");
 const { HouseHoldModel } = require("./models/HouseholdSchema");
 const { itemsModel } = require("./models/itemsModel");
+const cors = require("cors")
 
 const app = express();
 ConnectTODb();
 
 app.use(express.json());
+app.use(cors())
 
 // ------------ SIGNUP and LOGIN -------------------------
 
