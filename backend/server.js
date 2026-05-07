@@ -35,7 +35,7 @@ app.post("/api/auth/register", async (req, res) => {
     return;
   }
 
-  let createUser = await UserModel.create({
+  let createUser = await UserModel.create({ 
     name,
     email,
     password: hashPassword,
