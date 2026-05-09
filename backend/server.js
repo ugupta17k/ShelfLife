@@ -308,11 +308,11 @@ app.post("/api/items", AuthMiddleware, async (req, res)=>{
 })
 
 
-app.put("/api/items/updatee", AuthMiddleware, async (req,res)=>{
-  res.json({
-    message :" workinggg dudeeeee"
-  })
-})
+// app.put("/api/items/updatee", AuthMiddleware, async (req,res)=>{
+//   res.json({
+//     message :" workinggg dudeeeee"
+//   })
+// })
 
 app.put("/api/items/update", AuthMiddleware, async (req, res) => {
   let userId = req.userId;
@@ -482,9 +482,6 @@ app.delete("/api/items/Delete", AuthMiddleware, async (req,res)=>{
     DeleteItem
   })
 })
-
-
-app.get()
 
 app.listen(3000, () => {
   console.log("server is running on port 3000");

@@ -13,7 +13,7 @@ const SignUp = () => {
     console.log(password);
 
     try{
-        const res = axios.post("http:localhost:3000/api/auth/register",{
+        const res = axios.post("http://localhost:3000/api/auth/register",{
             name,
             email,
             password
